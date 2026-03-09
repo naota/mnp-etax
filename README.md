@@ -12,7 +12,7 @@ Goで書かれたマイナカードの操作ユーティリティ
 
 マイナポータルの Chrome 拡張は NativeMessagingHosts によってネイティブアプリと通信します. これは以下のファイルにより設定することができます.
 
-```bash
+```
 $ cat .config/google-chrome/NativeMessagingHosts/jp.go.myna.json
 {
     "name" : "jp.go.myna",
@@ -29,7 +29,7 @@ $ cat .config/google-chrome/NativeMessagingHosts/jp.go.myna.json
 
 NativeMessagingHosts のプログラムは(type=stdioの場合), 標準入出力によって Chrome拡張とのデータのやりとりを行います. そこで以下のようなスクリプトを指定することができます.
 
-```
+```bash
 #!/bin/bash
 
 LOGDIR="$HOME/tmp/mnp"
