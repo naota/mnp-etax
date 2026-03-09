@@ -74,3 +74,5 @@ SIZE=$(stat -c %s reply.json)
 printf "\x62\x0a\0\0"
 cat reply.json
 ```
+
+なお, 実行にはreplyのtemplateが必要となります.
