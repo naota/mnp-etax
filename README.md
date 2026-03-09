@@ -40,7 +40,32 @@ cd "${LOGDIR}"
 tee "${LOGDIR}/in.log" | bash my-mnp-login.sh 2>> "${LOGDIR}/run.log" | tee "${LOGDIR}/out.log"
 ```
 
-### mnpを使ったログインスクリプト
+## マイナポータルへのログイン
+
+Linux上で, マイナカード(カードリーダ)を用いたマイナポータルへのログインを行います. 正式なプログラムをwineで動かす方法と, mnpを使う方法があります. wineにはpatchが必要です.
+
+## wineによる実行
+
+まず, マイナポータルのプログラムをwine上にインストールします.
+
+そして, たとえば以下のスクリプトを使って正規プログラムをwineで動かすことができます. WINEPREFIXやLOGDIR, "<user>"の適切な置き換えが必要です.
+
+```bash
+# 環境にあわせて設定
+WINE=$(which wine)
+LOGDIR=...
+export WINEPREFIX=...
+
+# debug
+# export LD_LIBRARY_PATH=/home/naota/src/pcsc-lite-2.3.1/src/.libs
+export LC_ALL=ja_JP.utf8
+
+cd "${WINEPREFIX}/drive_c/drive_c/users/<user>/AppData/Local/MPA/Chrome/extension"
+tee "${LOGDIR}/in.log" |
+	${WINE} ..\\bin\\MPA.exe $* --parent-window=0 2>>"${LOGDIR}/run.log" | tee "${LOGDIR}/out.log"
+```
+
+## mnpを使ったログインスクリプト
 
 NativeMessagingHosts は各メッセージを"<4byteのlength><payload>"の形で送受信します. したがって, "od"などを使えばシェルスクリプトでもメッセージを読むことができます.
 
