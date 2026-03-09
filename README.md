@@ -40,7 +40,7 @@ cd "${LOGDIR}"
 tee "${LOGDIR}/in.log" | bash my-mnp-login.sh 2>> "${LOGDIR}/run.log" | tee "${LOGDIR}/out.log"
 ```
 
-### ### mnpを使ったログインスクリプト
+### mnpを使ったログインスクリプト
 
 NativeMessagingHosts は各メッセージを"<4byteのlength><payload>"の形で送受信します. したがって, "od"などを使えばシェルスクリプトでもメッセージを読むことができます.
 
