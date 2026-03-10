@@ -1,0 +1,31 @@
+{
+    "name": "navigator.userAgent",
+    "description": "Change navigator.userAgent to Windows on Chrome's download page.",
+    "version": "1",
+    "manifest_version": 3,
+    "background": {
+        "service_worker": "background.js"
+    },
+    "permissions": [
+        "declarativeNetRequest",
+        "declarativeNetRequestFeedback",
+        "webRequest"
+    ],
+    "host_permissions": [
+        "https://*.nta.go.jp/*",
+        "https://www.whatsmyua.info/*"
+    ],
+    "content_scripts": [
+        {
+            "run_at": "document_start",
+            "js": [
+                "contentscript.js"
+            ],
+            "matches": [
+                "https://*.myna.go.jp/*",
+                "https://*.nta.go.jp/*",
+                "https://www.whatsmyua.info/*"
+            ]
+        }
+    ]
+}
