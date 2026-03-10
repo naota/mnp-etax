@@ -1,0 +1,114 @@
+diff -ur wine-8.17/dlls/crypt32/decode.c wine-8.17.patched/dlls/crypt32/decode.c
+--- wine-8.17/dlls/crypt32/decode.c	2023-09-30 05:29:20.000000000 +0900
++++ wine-8.17.patched/dlls/crypt32/decode.c	2023-10-03 14:26:34.332006153 +0900
+@@ -3041,10 +3041,63 @@
+             }
+             break;
+         case 0: /* otherName */
++        {
++            const BYTE *oidEncoded = pbEncoded + 1 + lenBytes;
++            DWORD oidLenBytes, oidLen, oidDecodedLen;
++
++            bytesNeeded += sizeof(CERT_OTHER_NAME);
++
++            assert(oidEncoded[0] == 0x06);
++            oidLenBytes = GET_LEN_BYTES(oidEncoded[1]);
++            if (!CRYPT_GetLen(oidEncoded, dataLen, &oidLen)) {
++                FIXME("failed to parse OID\n");
++                SetLastError(CRYPT_E_ASN1_CORRUPT);
++                ret = FALSE;
++                break;
++            }
++            ret = CRYPT_AsnDecodeOidIgnoreTag(oidEncoded, dataLen,
++                                              0, NULL, &oidDecodedLen, NULL);
++            bytesNeeded += oidDecodedLen;
++
++            const BYTE *valEncoded = oidEncoded + 1 + oidLenBytes + oidLen;
++            DWORD valLenBytes, valLen;
++
++            assert(valEncoded[0] == 0xa0);
++            valLenBytes = GET_LEN_BYTES(valEncoded[1]);
++            if (!CRYPT_GetLen(valEncoded, dataLen - 1 - oidLenBytes - oidLen, &valLen)) {
++                FIXME("failed to parse value\n");
++                SetLastError(CRYPT_E_ASN1_CORRUPT);
++                ret = FALSE;
++                break;
++            }
++            bytesNeeded += valLen;
++
++            /*
++            const BYTE *bodyEncoded = valEncoded + 1 + valLenBytes;
++            DWORD bodyLenBytes, bodyLen;
++
++            // only support UTF8String
++            assert(bodyEncoded[0] == 0x0c);
++            bodyLenBytes = GET_LEN_BYTES(bodyEncoded[1]);
++            if (!CRYPT_GetLen(bodyEncoded, valLen, &bodyLen)) {
++                FIXME("failed to parse UTF8String\n");
++                goto othername_err;
++            }
++            */
++
++            break;
++        }
++            /*
+             FIXME("%d: stub\n", pbEncoded[0] & ASN_TYPE_MASK);
+             SetLastError(CRYPT_E_ASN1_BADTAG);
+             ret = FALSE;
++            for (DWORD i = 0; i < cbEncoded; i++) {
++                FIXME("%02x ", pbEncoded[i]);
++                if (i % 8 == 0)
++                    FIXME("\n");
++            }
+             break;
++            */
+         case 3: /* x400Address, unimplemented */
+         case 5: /* ediPartyName, unimplemented */
+             TRACE("type %d unimplemented\n", pbEncoded[0] & ASN_TYPE_MASK);
+@@ -3075,6 +3128,46 @@
+                 entry->dwAltNameChoice = (pbEncoded[0] & ASN_TYPE_MASK) + 1;
+                 switch (pbEncoded[0] & ASN_TYPE_MASK)
+                 {
++                case 0:
++                {
++                    const BYTE *oidEncoded = pbEncoded + 1 + lenBytes;
++                    DWORD oidLenBytes, oidLen, oidDecodedLen;
++
++                    /* entry->pOtherName is already set. */
++                    entry->pOtherName->pszObjId = (LPSTR)((BYTE*)entry->pOtherName + sizeof(CERT_OTHER_NAME));
++
++                    assert(oidEncoded[0] == 0x06);
++                    oidLenBytes = GET_LEN_BYTES(oidEncoded[1]);
++                    if (!CRYPT_GetLen(oidEncoded, dataLen, &oidLen)) {
++                        FIXME("failed to parse OID\n");
++                        SetLastError(CRYPT_E_ASN1_CORRUPT);
++                        ret = FALSE;
++                        break;
++                    }
++                    oidDecodedLen = *pcbStructInfo - sizeof(CERT_OTHER_NAME);
++                    ret = CRYPT_AsnDecodeOidIgnoreTag(oidEncoded, dataLen,
++                                                      0, &entry->pOtherName->pszObjId,
++                                                      &oidDecodedLen, NULL);
++
++                    const BYTE *valEncoded = oidEncoded + 1 + oidLenBytes + oidLen;
++                    DWORD valLenBytes, valLen;
++
++                    assert(valEncoded[0] == 0xa0);
++                    valLenBytes = GET_LEN_BYTES(valEncoded[1]);
++                    if (!CRYPT_GetLen(valEncoded, dataLen - 1 - oidLenBytes - oidLen, &valLen)) {
++                        FIXME("failed to parse value\n");
++                        SetLastError(CRYPT_E_ASN1_CORRUPT);
++                        ret = FALSE;
++                        break;
++                    }
++
++                    entry->pOtherName->Value.cbData = valLen;
++                    entry->pOtherName->Value.pbData = (BYTE*)entry->pOtherName->pszObjId + oidDecodedLen;
++                    memcpy(entry->pOtherName->Value.pbData, valEncoded + 1 + valLenBytes,
++                           valLen);
++
++                    break;
++                }
+                 case 1: /* rfc822Name */
+                 case 2: /* dNSName */
+                 case 6: /* uniformResourceIdentifier */

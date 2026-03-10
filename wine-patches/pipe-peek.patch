@@ -1,0 +1,69 @@
+diff --git a/dlls/crypt32/base64.c b/dlls/crypt32/base64.c
+index b61ed7ff8cc4..5019c22ce1df 100644
+--- a/dlls/crypt32/base64.c
++++ b/dlls/crypt32/base64.c
+@@ -1296,6 +1296,8 @@ BOOL WINAPI CryptStringToBinaryW(LPCWSTR pszString,
+         SetLastError(ERROR_INVALID_DATA);
+         return FALSE;
+     }
++    if (dwFlags == CRYPT_STRING_HEXRAW)
++        dwFlags = CRYPT_STRING_HEX;
+     switch (dwFlags)
+     {
+     case CRYPT_STRING_BASE64_ANY:
+diff --git a/server/fd.c b/server/fd.c
+index 8576882aaa9b..96cc2958661f 100644
+--- a/server/fd.c
++++ b/server/fd.c
+@@ -2405,6 +2405,40 @@ void no_fd_ioctl( struct fd *fd, ioctl_code_t code, struct async *async )
+     set_error( STATUS_OBJECT_TYPE_MISMATCH );
+ }
+ 
++static void pipe_peek(struct fd *fd)
++{
++    unsigned reply_size = get_reply_max_size();
++    FILE_PIPE_PEEK_BUFFER *buffer;
++    int unix_fd = get_unix_fd( fd );
++    int ret, avail;
++
++    if (unix_fd == -1)
++        return;
++
++    if (reply_size < offsetof( FILE_PIPE_PEEK_BUFFER, Data ))
++    {
++        set_error( STATUS_INFO_LENGTH_MISMATCH );
++        return;
++    }
++
++    reply_size -= offsetof( FILE_PIPE_PEEK_BUFFER, Data );
++    ret = ioctl(unix_fd, FIONREAD, &avail);
++    /* Keep previous behavior. */
++    if (ret) {
++        set_error( STATUS_NOT_SUPPORTED );
++        return;
++    }
++    reply_size = min( reply_size, avail );
++
++    if (!(buffer = set_reply_data_size( offsetof( FILE_PIPE_PEEK_BUFFER, Data[reply_size] )))) return;
++
++    // fprintf(stderr, "avail = %d\n", avail);
++    buffer->NamedPipeState    = FILE_PIPE_CONNECTED_STATE;
++    buffer->ReadDataAvailable = avail;
++    // buffer->NumberOfMessages  = 0;  /* FIXME */
++    // buffer->MessageLength     = message_length;
++}
++
+ /* default ioctl() routine */
+ void default_fd_ioctl( struct fd *fd, ioctl_code_t code, struct async *async )
+ {
+@@ -2413,7 +2447,9 @@ void default_fd_ioctl( struct fd *fd, ioctl_code_t code, struct async *async )
+     case FSCTL_DISMOUNT_VOLUME:
+         unmount_device( fd );
+         break;
+-
++    case FSCTL_PIPE_PEEK:
++        pipe_peek(fd);
++        break;
+     default:
+         set_error( STATUS_NOT_SUPPORTED );
+     }
