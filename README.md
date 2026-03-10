@@ -129,4 +129,4 @@ printf "\x62\x0a\0\0"
 cat reply.json
 ```
 
-なお, 実行にはreplyのtemplateが必要となります.
+なお, 実行にはreplyのtemplateが必要となります. たとえば, wineの出力などから取得することができます.
