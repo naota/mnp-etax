@@ -56,9 +56,9 @@ tee "${LOGDIR}/in.log" | bash my-mnp-login.sh 2>> "${LOGDIR}/run.log" | tee "${L
 
 Linux上で, マイナカード(カードリーダ)を用いたマイナポータルへのログインを行います. 正式なプログラムをwineで動かす方法と, mnpを使う方法があります. wineにはpatchが必要です.
 
-## wineによる実行
+### wineによる実行
 
-### マイナポータルアプリのインストール
+#### マイナポータルアプリのインストール
 
 上記スクリプトを実行する前提として, wine環境の設定やマイナポータルのプログラムのインストールが必要です.
 
@@ -71,7 +71,7 @@ $ winetricks fonts cjkfonts
 $ wine MPASetup_Chrome.exe
 ```
 
-### マイナポータルアプリによるログイン
+#### マイナポータルアプリによるログイン
 
 たとえば以下のスクリプトを使って正規プログラムをwineで動かすことができます. `WINEPREFIX` や `LOGDIR`, `<user>` の適切な置き換えが必要です.
 
@@ -88,7 +88,7 @@ tee "${LOGDIR}/in.log" |
 	${WINE} ..\\bin\\MPA.exe $* --parent-window=0 2>>"${LOGDIR}/run.log" | tee "${LOGDIR}/out.log"
 ```
 
-## mnpを使ったログインスクリプト
+### mnpを使ったログインスクリプト
 
 NativeMessagingHosts は各メッセージを"<4byteのlength><payload>"の形で送受信します. したがって, "od"などを使えばシェルスクリプトでもメッセージを読むことができます.
 
