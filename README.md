@@ -18,9 +18,7 @@ https://github.com/naota/mnp-etax/tree/main/winfake
 
 Goで書かれたマイナカードの操作ユーティリティ
 
-- original: https://github.com/jpki/myna
-- マイナポータルログインに必要なsign機能を追加したbranch
-  - https://github.com/naota/myna/tree/cms-sign-user
+https://github.com/jpki/myna
 
 ## NativeMessagingHosts
 
