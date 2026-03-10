@@ -56,7 +56,13 @@ tee "${LOGDIR}/in.log" | bash my-mnp-login.sh 2>> "${LOGDIR}/run.log" | tee "${L
 
 Linux上で, マイナカード(カードリーダ)を用いたマイナポータルへのログインを行います. 正式なプログラムをwineで動かす方法と, mnpを使う方法があります. wineにはpatchが必要です.
 
-### wineによる実行
+### wineによるログイン
+
+#### wineへのpatch
+
+マイナカードの処理にあたり, wineに対して以下の2つのpatchが必要になります.
+
+https://github.com/naota/mnp-etax/tree/main/wine-patches
 
 #### マイナポータルアプリのインストール
 
