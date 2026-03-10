@@ -10,7 +10,9 @@ Developer Toolsを使う方法として以下が紹介されています.
 
 ![Linux で 確定申告 2024年度版](https://qiita.com/nanbuwks/items/3ceb0b3f8e15a8aa3dbf)
 
-別の方法としては, ローカルで chrome拡張をいれる方法があります. うまく動けば, Developer Tools を開くことなくシームレスにアクセスができます.
+別の方法としては, ローカルで chrome拡張をいれる方法があります. うまく動けば, Developer Tools を開くことなくシームレスにアクセスができます. 一例として以下のような chrome 拡張の導入で書きかえが可能です.
+
+https://github.com/naota/mnp-etax/tree/main/winfake
 
 ## myna - マイナンバーカード・ユーティリティ
 
